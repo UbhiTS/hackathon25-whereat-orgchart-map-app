@@ -3,41 +3,41 @@
   "manifestVersion": "1.16",
   "version": "1.0.0",
   "id": "8b9c32ac-1234-5678-9012-123456789abc",
-  "packageName": "com.company.teamsorgmap",
+  "packageName": "com.microsoft.azure.rcg.whereat",
   "developer": {
-    "name": "Speed Zone Inc.",
-    "websiteUrl": "https://www.speedzoneinc.com",
-    "privacyUrl": "https://www.speedzoneinc.com/privacy",
-    "termsOfUseUrl": "https://www.speedzoneinc.com/terms"
+    "name": "Tarunpreet Ubhi & Mark Quinalty",
+    "websiteUrl": "https://www.microsoft.com",
+    "privacyUrl": "https://www.microsoft.com/privacy",
+    "termsOfUseUrl": "https://www.microsoft.com/terms"
   },
   "icons": {
     "color": "icon-color.png",
     "outline": "icon-outline.png"
   },
   "name": {
-    "short": "Org Map",
-    "full": "Organization Map and Hierarchy Viewer"
+    "short": "Where@",
+    "full": "Where@"
   },
   "description": {
-    "short": "View organizational hierarchy and team locations",
-    "full": "A comprehensive Microsoft Teams app that displays organizational hierarchy in tree structure and shows team members on an interactive map with location-based color coding."
+    "short": "View your team members on an interactive map.",
+    "full": "A Geo-Locator tool designed to visualize the geographic distribution of your team members on an interactive map. It shows where your colleagues are located across the country, and aims to enhance collaboration, facilitate in-person connections for events or travel, and support strategic planning by providing a clear, visual overview of your team (and customer locations TBD)."
   },
   "accentColor": "#6264a7",
   "staticTabs": [
     {
-      "entityId": "orgchart",
-      "name": "Org Chart",
-      "contentUrl": "https://localhost:3000/org-chart",
-      "websiteUrl": "https://localhost:3000/org-chart",
+      "entityId": "mapview",
+      "name": "MapView",
+      "contentUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/map-view",
+      "websiteUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/map-view",
       "scopes": [
         "personal"
       ]
     },
     {
-      "entityId": "mapview",
-      "name": "Map View",
-      "contentUrl": "https://localhost:3000/map-view",
-      "websiteUrl": "https://localhost:3000/map-view",
+      "entityId": "orgview",
+      "name": "OrgView",
+      "contentUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/org-chart",
+      "websiteUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/org-chart",
       "scopes": [
         "personal"
       ]
@@ -51,7 +51,7 @@
     "M365x23017794.onmicrosoft.com",
     "ubhims.com",
     "MngEnvMCAP383357.onmicrosoft.com",
-    "localhost:3000",
+    "kdt4w4f7-3000.usw3.devtunnels.ms",
     "graph.microsoft.com",
     "login.microsoftonline.com",
     "atlas.microsoft.com"
