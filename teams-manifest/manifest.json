@@ -1,0 +1,63 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "8b9c32ac-1234-5678-9012-123456789abc",
+  "packageName": "com.company.teamsorgmap",
+  "developer": {
+    "name": "Your Company Name",
+    "websiteUrl": "https://www.yourcompany.com",
+    "privacyUrl": "https://www.yourcompany.com/privacy",
+    "termsOfUseUrl": "https://www.yourcompany.com/terms"
+  },
+  "icons": {
+    "color": "icon-color.png",
+    "outline": "icon-outline.png"
+  },
+  "name": {
+    "short": "Org Map",
+    "full": "Organization Map and Hierarchy Viewer"
+  },
+  "description": {
+    "short": "View organizational hierarchy and team locations",
+    "full": "A comprehensive Microsoft Teams app that displays organizational hierarchy in tree structure and shows team members on an interactive map with location-based color coding."
+  },
+  "accentColor": "#6264a7",
+  "staticTabs": [
+    {
+      "entityId": "orgchart",
+      "name": "Org Chart",
+      "contentUrl": "https://yourdomain.com/org-chart",
+      "websiteUrl": "https://yourdomain.com/org-chart",
+      "scopes": [
+        "personal"
+      ]
+    },
+    {
+      "entityId": "mapview",
+      "name": "Map View",
+      "contentUrl": "https://yourdomain.com/map-view",
+      "websiteUrl": "https://yourdomain.com/map-view",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "M365x23017794.onmicrosoft.com",
+    "ubhims.com",
+    "MngEnvMCAP383357.onmicrosoft.com",
+    "localhost:3000",
+    "graph.microsoft.com",
+    "login.microsoftonline.com",
+    "atlas.microsoft.com"
+  ],
+  "webApplicationInfo": {
+    "id": "ddc1b501-9820-43f8-816b-7bc5e415a62a",
+    "resource": "https://graph.microsoft.com"
+  }
+}
