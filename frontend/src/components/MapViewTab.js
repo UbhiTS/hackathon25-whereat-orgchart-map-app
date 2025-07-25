@@ -12,6 +12,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
   const popupRef = useRef(null);
   const [mapReady, setMapReady] = useState(false);
   const [pendingMapData, setPendingMapData] = useState(null);
+  const [currentZoom, setCurrentZoom] = useState(3);
 
   // Get current user's email from Teams context
   useEffect(() => {
@@ -653,13 +654,12 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         // Create a unique data source ID to avoid conflicts
         const dataSourceId = `user-data-${Date.now()}`;
         const dataSource = new atlas.source.DataSource(dataSourceId, {
-          // Enable clustering with more aggressive settings to prevent disappearing clusters
+          // Optimize clustering settings to handle decimal zoom levels properly
           cluster: true,
-          clusterRadius: 80, // Increased radius for more consistent clustering across zoom levels
-          clusterMaxZoom: 20, // Max zoom to cluster points on - set to max to keep identical coordinates clustered
-          clusterMinPoints: 1, // Minimum points to form a cluster (allows single points to be clustered if at same location)
-          // Add tolerance to prevent clusters from disappearing at different zoom levels
-          tolerance: 0.1, // Simplification tolerance - smaller value keeps more points
+          clusterRadius: 60, // Increased radius to ensure clustering at decimal zooms
+          clusterMaxZoom: 14, // Lower max zoom to ensure clustering happens earlier
+          clusterMinPoints: 2, // Require 2+ points to form cluster
+          // Add buffer to prevent clustering inconsistencies at decimal zoom levels
           clusterProperties: {
             // Create aggregated properties for clusters
             'userNames': ['concat', ['concat', '', ['get', 'userName']], ['literal', '\n']],
@@ -680,8 +680,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         // Create symbol layer for user pins with custom profile photos
         const layerId = `user-symbols-${Date.now()}`;
         const symbolLayer = new atlas.layer.SymbolLayer(dataSource, layerId, {
-          // Ensure layer is visible at all zoom levels
-          minZoom: 1,
+          minZoom: 0,
           maxZoom: 24,
           iconOptions: {
             image: ['case',
@@ -693,20 +692,20 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
               ],
               ['get', 'photoUrl']
             ],
-            anchor: 'bottom', // Pin anchored at the bottom point
-            allowOverlap: false, // Prevent overlap to enable clustering
-            ignorePlacement: false, // Respect placement for proper clustering
+            anchor: 'bottom',
+            allowOverlap: true,
+            ignorePlacement: true,
             size: ['case', 
               ['has', 'point_count'], 
-              ['interpolate', ['linear'], ['get', 'point_count'], 2, 0.9, 10, 1.3, 20, 1.5], // Scale cluster size
-              0.8 // Default pin size
+              ['interpolate', ['linear'], ['get', 'point_count'], 2, 0.9, 10, 1.3, 20, 1.5],
+              0.8
             ],
             offset: [0, 0]
           },
           textOptions: {
             textField: ['case',
               ['has', 'point_count'],
-              '', // Don't show text for clusters (count is in the image)
+              '', // No text for clusters (count is in the image)
               ['get', 'userName'] // Show name for individual pins
             ],
             anchor: 'top',
@@ -781,6 +780,10 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           // Create a generic large cluster image
           const largeClusterImage = await createClusterImage('20+', 140);
           await map.imageSprite.add('cluster-large', largeClusterImage);
+
+          // Create custom cluster image for our manual clustering
+          const customClusterImage = await createClusterImage('●', 100);
+          await map.imageSprite.add('cluster-custom', customClusterImage);
 
           for (let i = 0; i < features.length; i++) {
             const feature = features[i];
@@ -935,6 +938,34 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         // Add the layer first, then load photos
         map.layers.add(symbolLayer);
         console.log(`Added symbol layer ${layerId} to map`);
+        
+        // Create a backup layer for individual pins to ensure they're always visible
+        const individualPinLayer = new atlas.layer.SymbolLayer(dataSource, `${layerId}-individual`, {
+          minZoom: 14, // Show individual pins when clustering stops (matches clusterMaxZoom)
+          maxZoom: 24,
+          filter: ['!', ['has', 'point_count']], // Only show non-clustered points
+          iconOptions: {
+            image: ['get', 'photoUrl'],
+            anchor: 'bottom',
+            allowOverlap: true,
+            ignorePlacement: true,
+            size: 0.8,
+            offset: [0, 0]
+          },
+          textOptions: {
+            textField: ['get', 'userName'],
+            anchor: 'top',
+            offset: [0, 0],
+            size: 16,
+            color: '#000000',
+            haloColor: '#ffffff',
+            haloWidth: 3,
+            font: ['StandardFont-Bold']
+          }
+        });
+        
+        map.layers.add(individualPinLayer);
+        console.log(`Added individual pin backup layer ${layerId}-individual to map`);
         
         // Load profile photos asynchronously
         addProfilePhotos().then(() => {
@@ -1316,6 +1347,22 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
             console.log('Map zoom changed, closing cluster tooltip');
             currentClusterPopup.close();
             currentClusterPopup = null;
+          }
+          
+          // Update zoom level in state for debug display
+          const newZoom = map.getCamera().zoom;
+          setCurrentZoom(newZoom);
+          
+          // Force data source refresh to ensure consistent clustering at decimal zoom levels
+          // This prevents the issue where pins disappear at decimal zooms like 4.8
+          const currentFeatures = dataSource.toJson();
+          if (currentFeatures && currentFeatures.features && currentFeatures.features.length > 0) {
+            // Small delay to allow zoom to settle, then refresh
+            setTimeout(() => {
+              dataSource.clear();
+              dataSource.add(currentFeatures.features);
+              console.log(`Refreshed clustering for zoom ${newZoom.toFixed(1)} with ${currentFeatures.features.length} features`);
+            }, 50);
           }
           
           // Debug cluster visibility
@@ -1814,6 +1861,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         }}>
           <strong>Debug Info:</strong> Map Instance: {mapInstanceRef.current ? '✓' : '✗'} | 
           Map Ready: {mapReady ? '✓' : '✗'} | 
+          Zoom Level: {currentZoom.toFixed(1)} |
           Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
           API Key: {process.env.REACT_APP_AZURE_MAPS_API_KEY ? 'Configured' : 'Missing'}
         </div>

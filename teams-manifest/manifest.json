@@ -5,10 +5,10 @@
   "id": "8b9c32ac-1234-5678-9012-123456789abc",
   "packageName": "com.company.teamsorgmap",
   "developer": {
-    "name": "Your Company Name",
-    "websiteUrl": "https://www.yourcompany.com",
-    "privacyUrl": "https://www.yourcompany.com/privacy",
-    "termsOfUseUrl": "https://www.yourcompany.com/terms"
+    "name": "Speed Zone Inc.",
+    "websiteUrl": "https://www.speedzoneinc.com",
+    "privacyUrl": "https://www.speedzoneinc.com/privacy",
+    "termsOfUseUrl": "https://www.speedzoneinc.com/terms"
   },
   "icons": {
     "color": "icon-color.png",
@@ -27,8 +27,8 @@
     {
       "entityId": "orgchart",
       "name": "Org Chart",
-      "contentUrl": "https://yourdomain.com/org-chart",
-      "websiteUrl": "https://yourdomain.com/org-chart",
+      "contentUrl": "https://localhost:3000/org-chart",
+      "websiteUrl": "https://localhost:3000/org-chart",
       "scopes": [
         "personal"
       ]
@@ -36,8 +36,8 @@
     {
       "entityId": "mapview",
       "name": "Map View",
-      "contentUrl": "https://yourdomain.com/map-view",
-      "websiteUrl": "https://yourdomain.com/map-view",
+      "contentUrl": "https://localhost:3000/map-view",
+      "websiteUrl": "https://localhost:3000/map-view",
       "scopes": [
         "personal"
       ]
