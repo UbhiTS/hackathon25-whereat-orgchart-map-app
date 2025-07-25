@@ -654,10 +654,10 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         // Create a unique data source ID to avoid conflicts
         const dataSourceId = `user-data-${Date.now()}`;
         const dataSource = new atlas.source.DataSource(dataSourceId, {
-          // Optimize clustering settings to handle decimal zoom levels properly
+          // Optimize clustering settings to handle decimal zoom levels and identical coordinates
           cluster: true,
           clusterRadius: 60, // Increased radius to ensure clustering at decimal zooms
-          clusterMaxZoom: 14, // Lower max zoom to ensure clustering happens earlier
+          clusterMaxZoom: 24, // Allow clustering at all zoom levels to prevent data loss for identical coordinates
           clusterMinPoints: 2, // Require 2+ points to form cluster
           // Add buffer to prevent clustering inconsistencies at decimal zoom levels
           clusterProperties: {
@@ -940,10 +940,16 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         console.log(`Added symbol layer ${layerId} to map`);
         
         // Create a backup layer for individual pins to ensure they're always visible
+        // This layer shows individual pins at high zoom levels only when they're not clustered
         const individualPinLayer = new atlas.layer.SymbolLayer(dataSource, `${layerId}-individual`, {
-          minZoom: 14, // Show individual pins when clustering stops (matches clusterMaxZoom)
+          minZoom: 18, // Show individual pins only at very high zoom levels
           maxZoom: 24,
-          filter: ['!', ['has', 'point_count']], // Only show non-clustered points
+          filter: [
+            'all',
+            ['!', ['has', 'point_count']], // Only show non-clustered points
+            // Additional filter to ensure we don't show duplicate pins for identical coordinates
+            ['!=', ['get', 'clustered'], true]
+          ],
           iconOptions: {
             image: ['get', 'photoUrl'],
             anchor: 'bottom',
@@ -1130,6 +1136,13 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                 `;
               }).join('');
               
+              // Check if all cluster members have identical coordinates
+              const firstCoord = leaves[0].getCoordinates ? leaves[0].getCoordinates() : leaves[0].geometry.coordinates;
+              const hasIdenticalCoordinates = leaves.every(leaf => {
+                const coord = leaf.getCoordinates ? leaf.getCoordinates() : leaf.geometry.coordinates;
+                return coord[0] === firstCoord[0] && coord[1] === firstCoord[1];
+              });
+              
               const tooltipId = `cluster-tooltip-content-${Date.now()}`;
               const clusterContent = `
                 <div id="${tooltipId}" class="cluster-tooltip-content" style="
@@ -1150,7 +1163,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                     border-bottom: 2px solid #6264a7;
                     user-select: text;
                   ">
-                    <span>${properties.point_count} Team Members</span>
+                    <span>${properties.point_count} Team Members${hasIdenticalCoordinates ? ' (Same Location)' : ''}</span>
                     <button class="cluster-tooltip-close-btn" data-close-cluster-tooltip="true" style="
                       background: #f3f2f1;
                       border: 1px solid #8a8886;
@@ -1188,7 +1201,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                     border-top: 1px solid #f3f2f1;
                     user-select: none;
                   ">
-                    Click to zoom in and expand
+                    ${hasIdenticalCoordinates ? 'Users at identical location - cluster persists at all zoom levels' : 'Click to zoom in and expand'}
                   </div>
                 </div>
               `;
@@ -1757,6 +1770,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
     }, 100);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Second attempt to initialize map if first attempt failed
@@ -1769,6 +1783,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
