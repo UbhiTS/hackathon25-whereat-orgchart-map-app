@@ -20,10 +20,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Azure AD configuration
-AZURE_CLIENT_ID = os.environ('AZURE_CLIENT_ID')
-AZURE_CLIENT_SECRET = os.environ('AZURE_CLIENT_SECRET')
-AZURE_TENANT_ID = os.environ('AZURE_TENANT_ID')
-AZURE_MAPS_API_KEY = os.environ('AZURE_MAPS_API_KEY')
+AZURE_CLIENT_ID = os.getenv('AZURE_CLIENT_ID')
+AZURE_CLIENT_SECRET = os.getenv('AZURE_CLIENT_SECRET')
+AZURE_TENANT_ID = os.getenv('AZURE_TENANT_ID')
+AZURE_MAPS_API_KEY = os.getenv('AZURE_MAPS_API_KEY')
 
 class GraphAPIClient:
     def __init__(self):
