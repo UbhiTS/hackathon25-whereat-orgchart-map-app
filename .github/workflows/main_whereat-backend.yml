@@ -41,9 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            ./backend
-            !./backend/venv
+          path: backend
 
   deploy:
     runs-on: ubuntu-latest
