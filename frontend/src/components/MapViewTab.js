@@ -435,7 +435,8 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
 
     try {
       console.log('Fetching map data for:', email);
-      const response = await axios.get(`http://localhost:5000/api/map-data/${encodeURIComponent(email)}`);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await axios.get(`${backendUrl}/api/map-data/${encodeURIComponent(email)}`);
       
       if (response.data.success) {
         console.log('Map data received:', response.data.data.length, 'users');
@@ -475,7 +476,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
     } catch (err) {
       console.error('Error fetching map data:', err);
       if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
-        setError('Failed to connect to the server. Please check if the backend is running on http://localhost:5000');
+        setError(`Failed to connect to the server. Please check if the backend is running on ${process.env.REACT_APP_BACKEND_URL}`);
       } else if (err.response) {
         setError(`Server error: ${err.response.status} - ${err.response.data?.error || err.response.statusText}`);
       } else {
@@ -618,7 +619,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           locationType: location_type || 'unknown',
           borderColor: border_color || 'gray',
           photoUrl: `user-photo-${user.id || `user_${index}`}`, // This will be the custom pin image ID
-          originalPhotoUrl: `http://localhost:5000/api/user-photo/${user.id || 'default'}` // Keep original for popup
+          originalPhotoUrl: `${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id || 'default'}` // Keep original for popup
         });
 
         features.push(feature);
@@ -1085,7 +1086,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                 const leafProps = leaf.getProperties ? leaf.getProperties() : leaf.properties;
                 const userName = leafProps.userName || 'Unknown User';
                 const userEmail = leafProps.userEmail || '';
-                const originalPhotoUrl = leafProps.originalPhotoUrl || `http://localhost:5000/api/user-photo/${leafProps.userId || 'default'}`;
+                const originalPhotoUrl = leafProps.originalPhotoUrl || `${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${leafProps.userId || 'default'}`;
                 
                 return `
                   <div style="
@@ -1965,7 +1966,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                       }}
                     >
                       <img
-                        src={`http://localhost:5000/api/user-photo/${user.id}`}
+                        src={`${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id}`}
                         alt={user.displayName}
                         style={{
                           width: '40px',

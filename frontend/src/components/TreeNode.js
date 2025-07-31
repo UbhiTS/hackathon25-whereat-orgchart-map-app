@@ -49,7 +49,7 @@ const TreeNode = ({ node, level = 0 }) => {
       <div className="user-node">
         <img
           className="user-photo"
-          src={`http://localhost:5000/api/user-photo/${user.id}`}
+          src={`${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id}`}
           alt={user.displayName}
           onError={(e) => {
             e.target.src = getDefaultPhotoUrl();

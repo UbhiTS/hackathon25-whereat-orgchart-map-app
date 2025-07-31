@@ -25,7 +25,8 @@ const OrgChartTab = ({ teamsContext, getAuthToken }) => {
     setError(null);
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/org-hierarchy/${encodeURIComponent(email)}`);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await axios.get(`${backendUrl}/api/org-hierarchy/${encodeURIComponent(email)}`);
       
       if (response.data.success) {
         setOrgData(response.data.data);
