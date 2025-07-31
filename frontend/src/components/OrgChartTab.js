@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TreeNode from './TreeNode';
+import { getConfig } from '../config';
 
 const OrgChartTab = ({ teamsContext, getAuthToken }) => {
   const [userEmail, setUserEmail] = useState('');
@@ -25,7 +26,8 @@ const OrgChartTab = ({ teamsContext, getAuthToken }) => {
     setError(null);
 
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const config = getConfig();
+      const backendUrl = config.backendUrl;
       const response = await axios.get(`${backendUrl}/api/org-hierarchy/${encodeURIComponent(email)}`);
       
       if (response.data.success) {

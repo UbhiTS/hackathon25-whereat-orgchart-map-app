@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getConfig } from '../config';
 
 const TreeNode = ({ node, level = 0 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -49,7 +50,7 @@ const TreeNode = ({ node, level = 0 }) => {
       <div className="user-node">
         <img
           className="user-photo"
-          src={`${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id}`}
+          src={`${getConfig().backendUrl}/api/user-photo/${user.id}`}
           alt={user.displayName}
           onError={(e) => {
             e.target.src = getDefaultPhotoUrl();

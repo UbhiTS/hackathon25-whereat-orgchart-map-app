@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as atlas from 'azure-maps-control';
+import { getConfig } from '../config';
 
 const MapDiagnostic = () => {
   const [diagnostics, setDiagnostics] = useState({
@@ -28,7 +29,8 @@ const MapDiagnostic = () => {
       }
 
       // Check API key
-      const apiKey = process.env.REACT_APP_AZURE_MAPS_API_KEY;
+      const config = getConfig();
+      const apiKey = config.azureMapsApiKey;
       if (apiKey && apiKey !== 'your_azure_maps_api_key_here') {
         results.apiKeyConfigured = true;
       } else {
@@ -115,7 +117,7 @@ const MapDiagnostic = () => {
 
       <div style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
         <div>Atlas object available: {atlas ? 'Yes' : 'No'}</div>
-        <div>API Key: {process.env.REACT_APP_AZURE_MAPS_API_KEY ? `${process.env.REACT_APP_AZURE_MAPS_API_KEY.substring(0, 8)}...` : 'Not set'}</div>
+        <div>API Key: {getConfig().azureMapsApiKey ? `${getConfig().azureMapsApiKey.substring(0, 8)}...` : 'Not set'}</div>
         <div>Environment: {process.env.NODE_ENV}</div>
       </div>
     </div>

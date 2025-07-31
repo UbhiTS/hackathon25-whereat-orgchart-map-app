@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import * as atlas from 'azure-maps-control';
+import { getConfig } from '../config';
 
 const MapViewTab = ({ teamsContext, getAuthToken }) => {
   const [userEmail, setUserEmail] = useState('');
@@ -149,9 +150,10 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
     }
 
     // Check if Azure Maps API key is configured
-    const apiKey = process.env.REACT_APP_AZURE_MAPS_API_KEY;
+    const config = getConfig();
+    const apiKey = config.azureMapsApiKey;
     if (!apiKey || apiKey === 'your_azure_maps_api_key_here') {
-      setError('Azure Maps API key not configured. Please check your .env file.');
+      setError('Azure Maps API key not configured. Please check your environment variables.');
       return;
     }
 
@@ -435,7 +437,8 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
 
     try {
       console.log('Fetching map data for:', email);
-      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const config = getConfig();
+      const backendUrl = config.backendUrl;
       const response = await axios.get(`${backendUrl}/api/map-data/${encodeURIComponent(email)}`);
       
       if (response.data.success) {
@@ -476,7 +479,8 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
     } catch (err) {
       console.error('Error fetching map data:', err);
       if (err.code === 'ERR_NETWORK' || err.message.includes('Network Error')) {
-        setError(`Failed to connect to the server. Please check if the backend is running on ${process.env.REACT_APP_BACKEND_URL}`);
+        const config = getConfig();
+        setError(`Failed to connect to the server. Please check if the backend is running on ${config.backendUrl}`);
       } else if (err.response) {
         setError(`Server error: ${err.response.status} - ${err.response.data?.error || err.response.statusText}`);
       } else {
@@ -619,7 +623,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           locationType: location_type || 'unknown',
           borderColor: border_color || 'gray',
           photoUrl: `user-photo-${user.id || `user_${index}`}`, // This will be the custom pin image ID
-          originalPhotoUrl: `${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id || 'default'}` // Keep original for popup
+          originalPhotoUrl: `${getConfig().backendUrl}/api/user-photo/${user.id || 'default'}` // Keep original for popup
         });
 
         features.push(feature);
@@ -1086,7 +1090,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                 const leafProps = leaf.getProperties ? leaf.getProperties() : leaf.properties;
                 const userName = leafProps.userName || 'Unknown User';
                 const userEmail = leafProps.userEmail || '';
-                const originalPhotoUrl = leafProps.originalPhotoUrl || `${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${leafProps.userId || 'default'}`;
+                const originalPhotoUrl = leafProps.originalPhotoUrl || `${getConfig().backendUrl}/api/user-photo/${leafProps.userId || 'default'}`;
                 
                 return `
                   <div style="
@@ -1879,7 +1883,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           Map Ready: {mapReady ? '✓' : '✗'} | 
           Zoom Level: {currentZoom.toFixed(1)} |
           Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
-          API Key: {process.env.REACT_APP_AZURE_MAPS_API_KEY ? 'Configured' : 'Missing'}
+          API Key: {getConfig().azureMapsApiKey ? 'Configured' : 'Missing'}
         </div>
 
         {error && (
@@ -1968,7 +1972,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
                       }}
                     >
                       <img
-                        src={`${process.env.REACT_APP_BACKEND_URL}/api/user-photo/${user.id}`}
+                        src={`${getConfig().backendUrl}/api/user-photo/${user.id}`}
                         alt={user.displayName}
                         style={{
                           width: '40px',
