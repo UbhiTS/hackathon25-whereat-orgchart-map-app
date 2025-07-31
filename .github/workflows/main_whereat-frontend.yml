@@ -7,11 +7,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - frontend/**
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -33,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: frontend/build
 
   deploy:
     runs-on: ubuntu-latest
