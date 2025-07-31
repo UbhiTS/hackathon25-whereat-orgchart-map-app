@@ -27,8 +27,8 @@
     {
       "entityId": "mapview",
       "name": "MapView",
-      "contentUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/map-view",
-      "websiteUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/map-view",
+      "contentUrl": "https://whereat-frontend.azurewebsites.net/map-view",
+      "websiteUrl": "https://whereat-frontend.azurewebsites.net/map-view",
       "scopes": [
         "personal"
       ]
@@ -36,8 +36,8 @@
     {
       "entityId": "orgview",
       "name": "OrgView",
-      "contentUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/org-chart",
-      "websiteUrl": "https://kdt4w4f7-3000.usw3.devtunnels.ms/org-chart",
+      "contentUrl": "https://whereat-frontend.azurewebsites.net/org-chart",
+      "websiteUrl": "https://whereat-frontend.azurewebsites.net/org-chart",
       "scopes": [
         "personal"
       ]
@@ -51,7 +51,7 @@
     "M365x23017794.onmicrosoft.com",
     "ubhims.com",
     "MngEnvMCAP383357.onmicrosoft.com",
-    "kdt4w4f7-3000.usw3.devtunnels.ms",
+    "whereat-frontend.azurewebsites.net",
     "graph.microsoft.com",
     "login.microsoftonline.com",
     "atlas.microsoft.com"
