@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - backend/**
   workflow_dispatch:
 
 jobs:
@@ -39,8 +41,8 @@ jobs:
         with:
           name: python-app
           path: |
-            .
-            !venv/
+            backend
+            !backend/venv
 
   deploy:
     runs-on: ubuntu-latest
