@@ -1865,7 +1865,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         </div>
       </div>
 
-      <div className="tab-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="tab-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
         {/* Debug Information */}
         <div style={{ 
           background: '#f3f2f1', 
@@ -1902,7 +1902,7 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           </div>
         )}
 
-        <div className="map-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className="map-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
           {mapData.length > 0 && (
             <div className="map-controls">
               <div className="legend">
@@ -1933,7 +1933,9 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
               flex: 1,
               width: '100%',
               backgroundColor: '#f3f2f1',
-              minHeight: mapData.length > 0 ? '600px' : '500px'
+              minHeight: mapData.length > 0 ? '600px' : '500px',
+              position: 'relative',
+              zIndex: 1
             }}
           ></div>
           
