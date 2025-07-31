@@ -7,16 +7,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - frontend/**
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -24,20 +19,21 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '22.17'
-        
+          node-version: '22.x'
+
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: frontend
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_82BD2BE6CFC04ADB962F61D34510BF77 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_480EC807CB9D42DDB95616C48376D995 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9A8AF0A4167040A3B4F0ABBF69F0123F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F8D211C15E6A4BD3B7A66B6E112FD503 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1012E4F30BBA4248AA7C730A17CB3A2B }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CAE0EC91F9C741D0A7C13F8C22E2A52B }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -66,3 +62,4 @@ jobs:
           app-name: 'whereat-frontend'
           slot-name: 'Production'
           package: .
+          
