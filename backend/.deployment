@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "build": {
+    "os": "ubuntu-18.04",
+    "commands": [
+      "pip install -r requirements.txt"
+    ]
+  },
+  "deploy": {
+    "restart": "always",
+    "startup": {
+      "command": "python app.py"
+    }
+  }
+}

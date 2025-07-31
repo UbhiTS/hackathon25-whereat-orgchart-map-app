@@ -13,11 +13,44 @@ import logging
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS - Let Azure App Service handle CORS configuration
+# For local development, allow all origins
+if os.getenv('WEBSITE_SITE_NAME'):
+    # Running on Azure App Service - rely on Azure CORS configuration
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+else:
+    # Local development - allow all origins for easier testing
+    CORS(app, 
+         origins="*",
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         supports_credentials=False)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Handle preflight OPTIONS requests for local development
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS" and not os.getenv('WEBSITE_SITE_NAME'):
+        # Only handle OPTIONS requests in local development
+        response = jsonify()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization,X-Requested-With")
+        response.headers.add('Access-Control-Allow-Methods', "GET,POST,PUT,DELETE,OPTIONS")
+        return response
+
+# Add minimal CORS headers for local development
+@app.after_request
+def after_request(response):
+    if not os.getenv('WEBSITE_SITE_NAME'):
+        # Only add headers in local development
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Azure AD configuration
 AZURE_CLIENT_ID = os.getenv('AZURE_CLIENT_ID')
@@ -504,4 +537,6 @@ def test_auth():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    # For Azure App Service, use the PORT environment variable
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
