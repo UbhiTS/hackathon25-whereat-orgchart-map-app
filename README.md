@@ -1,4 +1,4 @@
-# Teams Org Map App
+# Where@ Organization Chart Map App
 
 A Microsoft Teams application that displays organizational hierarchy in two views:
 1. **Org Chart Tab**: Tree structure showing user hierarchy recursively
