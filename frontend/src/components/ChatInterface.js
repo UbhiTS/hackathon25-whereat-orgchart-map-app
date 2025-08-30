@@ -1,4 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { getConfig } from '../config';
 
 const ChatInterface = ({ mapData }) => {
@@ -6,7 +9,139 @@ const ChatInterface = ({ mapData }) => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [availableProviders, setAvailableProviders] = useState([]);
+  const [chatWidth, setChatWidth] = useState(400); // Default width
+  const [isResizing, setIsResizing] = useState(false);
   const messagesEndRef = useRef(null);
+  const chatRef = useRef(null);
+
+  // Function to convert custom table format to markdown tables
+  const preprocessMarkdown = (content) => {
+    // Debug: log the original content to understand the format
+    console.log('Original content:', content);
+    
+    // First, convert <br> tags to proper line breaks
+    let processedContent = content.replace(/<br\s*\/?>/gi, '  \n');
+    
+    // Split content into lines for processing
+    const lines = processedContent.split('\n');
+    const processedLines = [];
+    
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i].trim();
+      
+      // Check if this is a POD section header (like "POD 1 — West (CA, OR, WA, NV)")
+      if (line.match(/^POD\s+\d+\s*[—-]/)) {
+        processedLines.push(`### ${line}`);
+        i++;
+        
+        // Look for the table header line (Team Members | Customers...)
+        while (i < lines.length && lines[i].trim() === '') {
+          i++; // Skip empty lines
+        }
+        
+        if (i < lines.length && lines[i].includes('Team Members') && lines[i].includes('|')) {
+          const headerLine = lines[i].trim();
+          console.log('Found header line:', headerLine);
+          
+          // Create markdown table header
+          const headers = headerLine.split('|').map(h => h.trim());
+          processedLines.push('| ' + headers.join(' | ') + ' |');
+          processedLines.push('|' + headers.map(() => ' --- ').join('|') + '|');
+          i++;
+          
+          // Process table rows until we hit empty line or next POD
+          while (i < lines.length) {
+            const dataLine = lines[i].trim();
+            
+            // Stop if we hit empty line followed by POD or end of content
+            if (dataLine === '') {
+              // Check if next non-empty line is a new POD
+              let nextNonEmptyIdx = i + 1;
+              while (nextNonEmptyIdx < lines.length && lines[nextNonEmptyIdx].trim() === '') {
+                nextNonEmptyIdx++;
+              }
+              if (nextNonEmptyIdx >= lines.length || lines[nextNonEmptyIdx].match(/^POD\s+\d+\s*[—-]/)) {
+                processedLines.push(''); // Add empty line to separate sections
+                break;
+              }
+              i++;
+              continue;
+            }
+            
+            // If line contains pipe, treat as table row
+            if (dataLine.includes('|')) {
+              const cells = dataLine.split('|').map(c => c.trim());
+              processedLines.push('| ' + cells.join(' | ') + ' |');
+            } else if (dataLine.match(/^POD\s+\d+\s*[—-]/)) {
+              // Hit next POD section, back up one step
+              i--;
+              break;
+            } else {
+              // Regular content line
+              processedLines.push(dataLine);
+            }
+            i++;
+          }
+        } else {
+          // No table found, just add the line
+          processedLines.push(line);
+          i++;
+        }
+      } else {
+        // Regular line, just add it
+        processedLines.push(line);
+        i++;
+      }
+    }
+    
+    const result = processedLines.join('\n');
+    console.log('Processed content:', result);
+    return result;
+  };
+
+  // Handle mouse events for resizing
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizing) return;
+    
+    const container = chatRef.current?.parentElement;
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = containerRect.right - e.clientX;
+    
+    // Set minimum and maximum widths
+    const minWidth = 300;
+    const maxWidth = containerRect.width * 0.6; // Max 60% of container width
+    
+    if (newWidth >= minWidth && newWidth <= maxWidth) {
+      setChatWidth(newWidth);
+    }
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+    document.body.classList.remove('resizing');
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }, [handleMouseMove]);
+
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.classList.add('resizing');
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [handleMouseMove, handleMouseUp]);
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('resizing');
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,7 +265,28 @@ const ChatInterface = ({ mapData }) => {
   ];
 
   return (
-    <div className="chat-interface">
+    <div 
+      ref={chatRef}
+      className="chat-interface" 
+      style={{ width: `${chatWidth}px` }}
+    >
+      {/* Resize Handle */}
+      <div 
+        className="chat-resize-handle"
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '4px',
+          background: isResizing ? '#6264a7' : 'transparent',
+          cursor: 'ew-resize',
+          zIndex: 1000,
+          borderLeft: '1px solid #e1dfdd'
+        }}
+      />
+      
       <div className="chat-header">
         <h3>Team Location Assistant</h3>
         <div className="chat-controls">
@@ -189,12 +345,21 @@ const ChatInterface = ({ mapData }) => {
               <span className="timestamp">{message.timestamp}</span>
             </div>
             <div className="message-content">
-              {message.content.split('\n').map((line, index) => (
-                <React.Fragment key={index}>
-                  {line}
-                  {index < message.content.split('\n').length - 1 && <br />}
-                </React.Fragment>
-              ))}
+              {message.role === 'assistant' ? (
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                >
+                  {preprocessMarkdown(message.content)}
+                </ReactMarkdown>
+              ) : (
+                message.content.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {line}
+                    {index < message.content.split('\n').length - 1 && <br />}
+                  </React.Fragment>
+                ))
+              )}
             </div>
           </div>
         ))}
