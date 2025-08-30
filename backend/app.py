@@ -8,6 +8,9 @@ import re
 import phonenumbers
 from phonenumbers import geocoder, carrier
 import logging
+from datetime import datetime
+import asyncio
+from llm_service import llm_service
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +35,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Handle preflight OPTIONS requests for local development
-@app.before_request
+# Remove manual CORS headers since flask-cors handles it
+# @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS" and not os.getenv('WEBSITE_SITE_NAME'):
         # Only handle OPTIONS requests in local development
@@ -42,7 +46,7 @@ def handle_preflight():
         response.headers.add('Access-Control-Allow-Methods', "GET,POST,PUT,DELETE,OPTIONS")
         return response
 
-# Add minimal CORS headers for local development
+# Remove manual CORS headers since flask-cors handles it
 @app.after_request
 def after_request(response):
     if not os.getenv('WEBSITE_SITE_NAME'):
@@ -535,6 +539,74 @@ def test_auth():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/api/chat', methods=['POST'])
+def chat_with_llm():
+    """
+    Endpoint for chatting with LLM about team location data
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        user_query = data.get('userQuery', '')
+        team_data = data.get('teamData', [])
+        provider = data.get('provider', 'openai')
+        
+        if not user_query:
+            return jsonify({'error': 'No user query provided'}), 400
+        
+        # Get available providers
+        available_providers = llm_service.get_available_providers()
+        
+        # If requested provider is not available, use the first available or fallback to simulation
+        if provider not in available_providers and available_providers:
+            provider = available_providers[0]
+            logger.info(f"Requested provider not available, using {provider}")
+        elif not available_providers:
+            logger.info("No LLM providers configured, using simulated responses")
+        
+        # Get response from LLM service (this handles async internally)
+        response_text = asyncio.run(llm_service.chat_completion(provider, user_query, team_data))
+        
+        return jsonify({
+            'response': response_text,
+            'provider': provider,
+            'available_providers': available_providers,
+            'timestamp': str(datetime.now())
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat/providers', methods=['GET'])
+def get_llm_providers():
+    """
+    Get available LLM providers and their configuration status (Azure OpenAI only)
+    """
+    try:
+        available_providers = llm_service.get_available_providers()
+        
+        provider_status = {
+            'azure': {
+                'available': 'azure' in available_providers,
+                'configured': bool(os.getenv('AZURE_OPENAI_ENDPOINT') and 
+                                 os.getenv('AZURE_OPENAI_API_KEY') and
+                                 os.getenv('AZURE_OPENAI_ENDPOINT') != 'https://your-resource.openai.azure.com/' and
+                                 os.getenv('AZURE_OPENAI_API_KEY') != 'your_azure_openai_api_key_here')
+            }
+        }
+        
+        return jsonify({
+            'available_providers': available_providers,
+            'provider_status': provider_status
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting LLM providers: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # For Azure App Service, use the PORT environment variable

@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -6,9 +9,6 @@ const port = process.env.PORT || 8080;
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'build')));
-
-// API routes (if any) should go here
-// app.use('/api', require('./api'));
 
 // Environment variables endpoint
 app.get('/config.js', (req, res) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import * as atlas from 'azure-maps-control';
 import { getConfig } from '../config';
+import ChatInterface from './ChatInterface';
 
 const MapViewTab = ({ teamsContext, getAuthToken }) => {
   const [userEmail, setUserEmail] = useState('');
@@ -1869,138 +1870,143 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
         </div>
       </div>
 
-      <div className="tab-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
-        {/* Debug Information */}
-        <div style={{ 
-          background: '#f3f2f1', 
-          padding: '10px', 
-          margin: '10px 0', 
-          borderRadius: '4px',
-          fontSize: '12px',
-          color: '#605e5c'
-        }}>
-          <strong>Debug Info:</strong> Map Instance: {mapInstanceRef.current ? '✓' : '✗'} | 
-          Map Ready: {mapReady ? '✓' : '✗'} | 
-          Zoom Level: {currentZoom.toFixed(1)} |
-          Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
-          API Key: {getConfig().azureMapsApiKey ? 'Configured' : 'Missing'}
-        </div>
-
-        {error && (
-          <div className="error-message">
-            {error}
+      <div className="tab-content map-view-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '20px' }}>
+          {/* Debug Information */}
+          <div style={{ 
+            background: '#f3f2f1', 
+            padding: '10px', 
+            margin: '10px 0', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#605e5c'
+          }}>
+            <strong>Debug Info:</strong> Map Instance: {mapInstanceRef.current ? '✓' : '✗'} | 
+            Map Ready: {mapReady ? '✓' : '✗'} | 
+            Zoom Level: {currentZoom.toFixed(1)} |
+            Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
+            API Key: {getConfig().azureMapsApiKey ? 'Configured' : 'Missing'}
           </div>
-        )}
 
-        {!mapData.length && !loading && !error && (
-          <div className="info-message">
-            Enter a user's email address above to view their team's locations on the map.
-            Team members will be displayed with colored borders based on location accuracy.
-          </div>
-        )}
-
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Fetching team location data...</p>
-          </div>
-        )}
-
-        <div className="map-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          {mapData.length > 0 && (
-            <div className="map-controls">
-              <div className="legend">
-                <h4 style={{ margin: 0, color: '#323130' }}>Location Accuracy:</h4>
-                <div className="legend-item">
-                  <div className="legend-dot green"></div>
-                  <span>Address/Office ({stats.address || 0})</span>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-dot orange"></div>
-                  <span>Phone Approximation ({stats.phone || 0})</span>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-dot gray"></div>
-                  <span>Timezone Only ({stats.timezone || 0})</span>
-                </div>
-              </div>
-              <div style={{ fontSize: '12px', color: '#605e5c' }}>
-                Total team members: {mapData.length}
-              </div>
+          {error && (
+            <div className="error-message">
+              {error}
             </div>
           )}
-          
-          <div 
-            ref={mapRef}
-            className="azure-map"
-            style={{ 
-              flex: 1,
-              width: '100%',
-              backgroundColor: '#f3f2f1',
-              minHeight: mapData.length > 0 ? '600px' : '500px',
-              position: 'relative',
-              zIndex: 1
-            }}
-          ></div>
-          
-          {/* Fallback: Show users in list format if map fails */}
-          {mapData.length > 0 && error && error.includes('Map') && (
-            <div style={{ 
-              position: 'absolute', 
-              top: '80px', 
-              left: '20px', 
-              right: '20px', 
-              bottom: '20px',
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              overflow: 'auto'
-            }}>
-              <h3>Team Members (Map View Unavailable)</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-                {mapData.map((userLocationData, index) => {
-                  const { user, location, border_color, location_type } = userLocationData;
-                  return (
-                    <div 
-                      key={user.id || index}
-                      style={{
-                        border: `2px solid ${getBorderColorHex(border_color)}`,
-                        borderRadius: '8px',
-                        padding: '15px',
-                        backgroundColor: '#f9f9f9'
-                      }}
-                    >
-                      <img
-                        src={`${getConfig().backendUrl}/api/user-photo/${user.id}`}
-                        alt={user.displayName}
+
+          {!mapData.length && !loading && !error && (
+            <div className="info-message">
+              Enter a user's email address above to view their team's locations on the map.
+              Team members will be displayed with colored borders based on location accuracy.
+            </div>
+          )}
+
+          {loading && (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Fetching team location data...</p>
+            </div>
+          )}
+
+          <div className="map-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            {mapData.length > 0 && (
+              <div className="map-controls">
+                <div className="legend">
+                  <h4 style={{ margin: 0, color: '#323130' }}>Location Accuracy:</h4>
+                  <div className="legend-item">
+                    <div className="legend-dot green"></div>
+                    <span>Address/Office ({stats.address || 0})</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot orange"></div>
+                    <span>Phone Approximation ({stats.phone || 0})</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot gray"></div>
+                    <span>Timezone Only ({stats.timezone || 0})</span>
+                  </div>
+                </div>
+                <div style={{ fontSize: '12px', color: '#605e5c' }}>
+                  Total team members: {mapData.length}
+                </div>
+              </div>
+            )}
+            
+            <div 
+              ref={mapRef}
+              className="azure-map"
+              style={{ 
+                flex: 1,
+                width: '100%',
+                backgroundColor: '#f3f2f1',
+                minHeight: mapData.length > 0 ? '600px' : '500px',
+                position: 'relative',
+                zIndex: 1
+              }}
+            ></div>
+            
+            {/* Fallback: Show users in list format if map fails */}
+            {mapData.length > 0 && error && error.includes('Map') && (
+              <div style={{ 
+                position: 'absolute', 
+                top: '80px', 
+                left: '20px', 
+                right: '20px', 
+                bottom: '20px',
+                backgroundColor: 'white',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                overflow: 'auto'
+              }}>
+                <h3>Team Members (Map View Unavailable)</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
+                  {mapData.map((userLocationData, index) => {
+                    const { user, location, border_color, location_type } = userLocationData;
+                    return (
+                      <div 
+                        key={user.id || index}
                         style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          marginBottom: '10px',
-                          border: `2px solid ${getBorderColorHex(border_color)}`
+                          border: `2px solid ${getBorderColorHex(border_color)}`,
+                          borderRadius: '8px',
+                          padding: '15px',
+                          backgroundColor: '#f9f9f9'
                         }}
-                        onError={(e) => {
-                          e.target.src = `data:image/svg+xml;base64,${getDefaultAvatarBase64()}`;
-                        }}
-                      />
-                      <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{user.displayName}</div>
-                      {user.jobTitle && <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '3px' }}>{user.jobTitle}</div>}
-                      {user.department && <div style={{ fontSize: '12px', color: '#8a8886', marginBottom: '3px' }}>{user.department}</div>}
-                      {location && <div style={{ fontSize: '11px', color: '#8a8886' }}>📍 {location.address}</div>}
-                      <div className={`location-type-badge ${location_type}`} style={{ marginTop: '8px' }}>
-                        {location_type === 'address' && 'Address'}
-                        {location_type === 'phone' && 'Phone Approx'}
-                        {location_type === 'timezone' && 'Timezone'}
+                      >
+                        <img
+                          src={`${getConfig().backendUrl}/api/user-photo/${user.id}`}
+                          alt={user.displayName}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            marginBottom: '10px',
+                            border: `2px solid ${getBorderColorHex(border_color)}`
+                          }}
+                          onError={(e) => {
+                            e.target.src = `data:image/svg+xml;base64,${getDefaultAvatarBase64()}`;
+                          }}
+                        />
+                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{user.displayName}</div>
+                        {user.jobTitle && <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '3px' }}>{user.jobTitle}</div>}
+                        {user.department && <div style={{ fontSize: '12px', color: '#8a8886', marginBottom: '3px' }}>{user.department}</div>}
+                        {location && <div style={{ fontSize: '11px', color: '#8a8886' }}>📍 {location.address}</div>}
+                        <div className={`location-type-badge ${location_type}`} style={{ marginTop: '8px' }}>
+                          {location_type === 'address' && 'Address'}
+                          {location_type === 'phone' && 'Phone Approx'}
+                          {location_type === 'timezone' && 'Timezone'}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        
+        {/* Chat Interface */}
+        <ChatInterface mapData={mapData} />
       </div>
     </div>
   );
