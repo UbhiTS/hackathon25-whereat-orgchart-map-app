@@ -5,8 +5,6 @@ const ChatInterface = ({ mapData }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState('azure');
-  const [providerStatus, setProviderStatus] = useState({});
   const [availableProviders, setAvailableProviders] = useState([]);
   const messagesEndRef = useRef(null);
 
@@ -28,20 +26,12 @@ const ChatInterface = ({ mapData }) => {
       const response = await fetch(`${backendUrl}/api/chat/providers`);
       if (response.ok) {
         const data = await response.json();
-        setProviderStatus(data.provider_status);
         setAvailableProviders(data.available_providers);
-        
-        // Set default provider to azure (since it's the only one)
-        setSelectedProvider('azure');
       }
     } catch (error) {
       console.error('Error fetching provider status:', error);
     }
   };
-
-  const llmProviders = [
-    { id: 'azure', name: 'Azure OpenAI', placeholder: 'Ask about team locations...' }
-  ];
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
