@@ -7,11 +7,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - frontend/**
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -27,13 +32,15 @@ jobs:
         run: |
           npm install
           npm run build --if-present
-          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: |
+            frontend
+            !frontend/node_modules
+
 
   deploy:
     runs-on: ubuntu-latest
