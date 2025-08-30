@@ -8,16 +8,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - backend/**
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -44,8 +39,8 @@ jobs:
         with:
           name: python-app
           path: |
-            backend
-            !backend/venv
+            .
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -63,9 +58,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_195B221797634CC3AEEFEEED6E1B8767 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5A371B008FA94D5FA6B5F00C524AFA24 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_33DA49654D2D4BF8A73C25AF7F7AB6AC }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_53C7199352B7487FB3278613108B668F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DD540BF2CC140C9B21034B806B0DAFE }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3B76C3D085D647B78744D0A172258B72 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
