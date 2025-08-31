@@ -1813,80 +1813,87 @@ const MapViewTab = ({ teamsContext, getAuthToken }) => {
           >
             {loading ? 'Loading...' : 'Show on Map'}
           </button>
-          <button
-            className="search-button"
-            onClick={() => {
-              console.log('Testing map display...');
-              if (mapInstanceRef.current) {
-                try {
-                  console.log('Map instance exists, testing camera...');
-                  const camera = mapInstanceRef.current.getCamera();
-                  console.log('Current camera:', camera);
-                  
-                  console.log('Setting camera to center of USA...');
-                  mapInstanceRef.current.setCamera({
-                    center: [-98.5795, 39.8283],
-                    zoom: 4,
-                    duration: 2000
-                  });
-                  
+          {/* Debug buttons - only shown when REACT_APP_DEBUG=true */}
+          {getConfig().debug && (
+            <>
+              <button
+                className="search-button"
+                onClick={() => {
+                  console.log('Testing map display...');
+                  if (mapInstanceRef.current) {
+                    try {
+                      console.log('Map instance exists, testing camera...');
+                      const camera = mapInstanceRef.current.getCamera();
+                      console.log('Current camera:', camera);
+                      
+                      console.log('Setting camera to center of USA...');
+                      mapInstanceRef.current.setCamera({
+                        center: [-98.5795, 39.8283],
+                        zoom: 4,
+                        duration: 2000
+                      });
+                      
+                      setError(null);
+                      console.log('Map test completed successfully');
+                    } catch (e) {
+                      console.error('Map test failed:', e);
+                      setError(`Map test failed: ${e.message}`);
+                    }
+                  } else {
+                    console.log('No map instance, trying to initialize...');
+                    initializeMap();
+                  }
+                }}
+                style={{ marginLeft: '10px', backgroundColor: '#0078d4' }}
+              >
+                Test Map
+              </button>
+              <button
+                className="search-button"
+                onClick={() => {
+                  console.log('Force reinitializing map...');
+                  if (mapInstanceRef.current) {
+                    try {
+                      mapInstanceRef.current.dispose();
+                    } catch (e) {
+                      console.warn('Error disposing map:', e);
+                    }
+                    mapInstanceRef.current = null;
+                  }
+                  setMapReady(false);
                   setError(null);
-                  console.log('Map test completed successfully');
-                } catch (e) {
-                  console.error('Map test failed:', e);
-                  setError(`Map test failed: ${e.message}`);
-                }
-              } else {
-                console.log('No map instance, trying to initialize...');
-                initializeMap();
-              }
-            }}
-            style={{ marginLeft: '10px', backgroundColor: '#0078d4' }}
-          >
-            Test Map
-          </button>
-          <button
-            className="search-button"
-            onClick={() => {
-              console.log('Force reinitializing map...');
-              if (mapInstanceRef.current) {
-                try {
-                  mapInstanceRef.current.dispose();
-                } catch (e) {
-                  console.warn('Error disposing map:', e);
-                }
-                mapInstanceRef.current = null;
-              }
-              setMapReady(false);
-              setError(null);
-              setTimeout(() => {
-                initializeMap();
-              }, 100);
-            }}
-            style={{ marginLeft: '10px', backgroundColor: '#8a8886' }}
-          >
-            Reset Map
-          </button>
+                  setTimeout(() => {
+                    initializeMap();
+                  }, 100);
+                }}
+                style={{ marginLeft: '10px', backgroundColor: '#8a8886' }}
+              >
+                Reset Map
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       <div className="tab-content map-view-layout" style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden', position: 'relative' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '20px' }}>
-          {/* Debug Information */}
-          <div style={{ 
-            background: '#f3f2f1', 
-            padding: '10px', 
-            margin: '10px 0', 
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: '#605e5c'
-          }}>
-            <strong>Debug Info:</strong> Map Instance: {mapInstanceRef.current ? '✓' : '✗'} | 
-            Map Ready: {mapReady ? '✓' : '✗'} | 
-            Zoom Level: {currentZoom.toFixed(1)} |
-            Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
-            API Key: {getConfig().azureMapsApiKey ? 'Configured' : 'Missing'}
-          </div>
+          {/* Debug Information - only shown when REACT_APP_DEBUG=true */}
+          {getConfig().debug && (
+            <div style={{ 
+              background: '#f3f2f1', 
+              padding: '10px', 
+              margin: '10px 0', 
+              borderRadius: '4px',
+              fontSize: '12px',
+              color: '#605e5c'
+            }}>
+              <strong>Debug Info:</strong> Map Instance: {mapInstanceRef.current ? '✓' : '✗'} | 
+              Map Ready: {mapReady ? '✓' : '✗'} | 
+              Zoom Level: {currentZoom.toFixed(1)} |
+              Pending Data: {pendingMapData ? pendingMapData.length : 0} users |
+              API Key: {getConfig().azureMapsApiKey ? 'Configured' : 'Missing'}
+            </div>
+          )}
 
           {error && (
             <div className="error-message">

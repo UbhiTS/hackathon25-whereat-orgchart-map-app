@@ -308,21 +308,6 @@ const ChatInterface = ({ mapData }) => {
           <div className="welcome-message">
             <p>👋 Hi! I'm your Team Location Assistant. I can help you find team members near specific locations or answer questions about your team's geographic distribution.</p>
             
-            {/* Provider Status */}
-            <div className="provider-status">
-              <p><strong>Azure OpenAI Status:</strong></p>
-              {availableProviders.includes('azure') ? (
-                <div className="status-good">
-                  ✅ Azure OpenAI configured and ready
-                </div>
-              ) : (
-                <div className="status-warning">
-                  ⚠️ Azure OpenAI not configured. Using simulated responses. 
-                  <br />Add Azure OpenAI credentials to .env file for enhanced AI responses.
-                </div>
-              )}
-            </div>
-            
             <div className="example-questions">
               <p><strong>Try asking:</strong></p>
               {exampleQuestions.map((question, index) => (

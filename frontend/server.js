@@ -14,7 +14,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.get('/config.js', (req, res) => {
   const config = {
     REACT_APP_AZURE_MAPS_API_KEY: process.env.REACT_APP_AZURE_MAPS_API_KEY,
-    REACT_APP_BACKEND_URL: process.env.REACT_APP_BACKEND_URL
+    REACT_APP_BACKEND_URL: process.env.REACT_APP_BACKEND_URL,
+    REACT_APP_DEBUG: process.env.REACT_APP_DEBUG
   };
   
   res.setHeader('Content-Type', 'application/javascript');
@@ -45,4 +46,5 @@ app.listen(port, () => {
   console.log(`Environment variables:`);
   console.log(`- REACT_APP_AZURE_MAPS_API_KEY: ${process.env.REACT_APP_AZURE_MAPS_API_KEY ? 'Set' : 'Not set'}`);
   console.log(`- REACT_APP_BACKEND_URL: ${process.env.REACT_APP_BACKEND_URL || 'Not set'}`);
+  console.log(`- REACT_APP_DEBUG: ${process.env.REACT_APP_DEBUG || 'Not set'}`);
 });
