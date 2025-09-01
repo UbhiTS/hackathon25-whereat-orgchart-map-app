@@ -1,4 +1,4 @@
-#Where@
+# Where@
 is an innovative proof-of-concept app designed to revolutionize how we visualize, connect, and strategically leverage our organizational talent. By mapping our company's org chart onto a live, interactive map, "Where@" provides an immediate, dynamic view of our team's geographic footprint.
 
 Leveraging AI, "Where@" moves beyond simple visualization to offer powerful, predictive insights.
