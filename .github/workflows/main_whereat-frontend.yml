@@ -7,16 +7,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - frontend/**
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -32,15 +27,13 @@ jobs:
         run: |
           npm install
           npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            frontend
-            !frontend/node_modules
-
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,9 +51,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6D0C16B1771B46CFB26FB536733CDE37 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E2529D18625C48FCA2D6289E41067962 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0F6BEBAE37EB4B508548AB53E7B91A4F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E7F48333216D4D99B3B47122FCD254AB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_04386335D7F24B2AA9CCC6A2AB6EC1C5 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C085279FE015461EA5337505C0CD61A9 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
